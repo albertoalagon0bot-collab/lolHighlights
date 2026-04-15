@@ -5,86 +5,117 @@ A comprehensive tool for automatically detecting, extracting, and analyzing high
 ## Features
 
 - **Automatic Highlight Detection**: AI-powered detection of epic plays, teamfights, and memorable moments
-- **Riot Games API Integration**: Real-time data fetching from official League APIs
+- **Riot Games API Integration**: Real-time data fetching from official League APIs with rate limiting
 - **Match Analysis**: Detailed KDA calculations, performance metrics, and highlight scoring
-- **Web Dashboard**: Interactive interface for browsing and managing highlights
-- **Database Storage**: Persistent storage for matches, highlights, and player data
-- **Comprehensive Testing**: Full test suite for all core functionality
+- **Highlight Categorization**: Highlights organized by combat, objectives, early game, comeback, and damage
+- **Export**: Export highlights in JSON, CSV, or Markdown formats
+- **Search & Filter**: Filter highlights by type, category, severity, score, or text search
+- **Database Storage**: MongoDB with connection pooling, migrations, and health monitoring
+- **Comprehensive Testing**: Full test suite covering unit, integration, and edge cases
 
 ## Tech Stack
 
 - **Backend**: Node.js with Express.js
-- **Database**: MongoDB (document storage)
-- **AI/ML**: TensorFlow.js for highlight detection
-- **Frontend**: React.js (planned)
+- **Database**: MongoDB (Mongoose ODM, connection pooling, migrations)
+- **API Client**: Riot Games API with automatic rate limiting and retry logic
 - **Testing**: Jest + Supertest
+
+## Quick Start
+
+```bash
+git clone https://github.com/albertoalagon0bot-collab/lolHighlights.git
+cd lolHighlights
+npm install
+cp .env.example .env
+npm start
+```
+
+See [docs/SETUP.md](docs/SETUP.md) for detailed setup and deployment instructions.
+
+## API Documentation
+
+See [docs/API.md](docs/API.md) for the complete API reference with all endpoints, parameters, and examples.
 
 ## Project Structure
 
 ```
 lolHighlights/
 ├── src/
+│   ├── config/
+│   │   ├── database.js      # DB connection, pooling, health checks
+│   │   └── migrations.js    # Migration system
 │   ├── models/
-│   │   └── Match.js
-│   ├── utils/
-│   │   └── HighlightDetector.js
+│   │   ├── Match.js         # Match schema with highlight detection
+│   │   └── Summoner.js      # Summoner schema
 │   ├── routes/
-│   │   ├── matches.js
-│   │   ├── champions.js
-│   │   └── highlights.js
-│   └── server.js
+│   │   ├── matches.js       # Match CRUD endpoints
+│   │   ├── champions.js     # Champion statistics
+│   │   ├── highlights.js    # Highlights with search, export, analyze
+│   │   └── summoners.js     # Riot API summoner lookup
+│   ├── services/
+│   │   └── riotApi.js       # Riot API client with rate limiting
+│   ├── utils/
+│   │   ├── HighlightDetector.js  # Base highlight detection
+│   │   └── HighlightAnalyzer.js  # Enhanced analysis & export
+│   └── server.js            # Express app
 ├── tests/
-│   └── highlightDetection.test.js
+│   ├── highlightDetection.test.js  # Base detector tests
+│   ├── highlightAnalyzer.test.js   # Enhanced analyzer tests
+│   ├── models.test.js              # Model unit tests
+│   ├── riotApi.test.js             # API client tests
+│   ├── database.test.js            # DB config tests
+│   └── api.test.js                 # API integration tests
+├── docs/
+│   ├── API.md             # Full API documentation
+│   └── SETUP.md           # Setup & deployment guide
 ├── package.json
 ├── .env.example
 └── README.md
 ```
 
-## Getting Started
-
-1. Clone the repository
-2. Install dependencies: `npm install`
-3. Set up environment variables: `cp .env.example .env`
-4. Start the server: `npm start`
-
 ## API Endpoints
 
-### Matches
-- `GET /api/matches` - Get all matches
-- `GET /api/matches/:id` - Get specific match
-- `POST /api/matches` - Create new match record
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/health` | Health check with DB status |
+| GET | `/api/matches` | List matches (paginated) |
+| GET | `/api/matches/:id` | Get specific match |
+| POST | `/api/matches` | Create match |
+| GET | `/api/champions` | Champion statistics |
+| GET | `/api/champions/:name` | Champion match history |
+| GET | `/api/highlights` | List highlights (search/filter) |
+| GET | `/api/highlights/:matchId/export` | Export highlights (JSON/CSV/MD) |
+| POST | `/api/highlights/:matchId/analyze` | Run enhanced analysis |
+| GET | `/api/summoners/:region/:name` | Look up summoner |
+| GET | `/api/summoners/:region/:name/matches` | Summoner match history |
 
-### Champions
-- `GET /api/champions` - List all champions
-- `GET /api/champions/:id` - Get champion details
+## Running Tests
 
-### Highlights
-- `GET /api/highlights` - Get all highlights
-- `POST /api/highlights` - Create new highlight
-- `GET /api/highlights/:id` - Get specific highlight
+```bash
+npm test           # Run all tests
+npm run test:watch # Watch mode
+npx jest --coverage # With coverage report
+```
 
-## Issues and TODOs
+## Configuration
 
-### High Priority
-- [ ] Set up database schema and connection (#1)
-- [ ] Implement Riot Games API integration (#2)
-- [ ] Enhance highlight extraction and analysis (#3)
+All configuration is done via environment variables. See `.env.example` for the full list.
 
-### Medium Priority
-- [ ] Add comprehensive test suite (#5)
-- [ ] Improve project documentation (#6)
-
-### Future Features
-- [ ] Build web dashboard interface (#4)
+Key variables:
+- `MONGODB_URI` - MongoDB connection string (required)
+- `RIOT_API_KEY` - Riot Games API key (required for summoner endpoints)
+- `RIOT_API_REGION` - Default region (default: `euw1`)
+- `HIGHLIGHT_THRESHOLD` - Minimum highlight score (default: `0.75`)
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests for new functionality
-5. Submit a pull request
+2. Create a feature branch: `git checkout -b feature/my-feature`
+3. Write tests for your changes
+4. Ensure all tests pass: `npm test`
+5. Commit with descriptive messages
+6. Push and open a Pull Request
 
 ## License
 
-MIT License - see LICENSE file for details
+MIT - Alberto Alagon
