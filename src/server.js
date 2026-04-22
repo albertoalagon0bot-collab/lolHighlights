@@ -4,6 +4,8 @@ const cors = require('cors');
 const helmet = require('helmet');
 require('dotenv').config();
 
+const db = require('./config/database');
+const { run: runMigrations } = require('./config/migrations');
 const matchesRouter = require('./routes/matches');
 const championsRouter = require('./routes/champions');
 const highlightsRouter = require('./routes/highlights');
@@ -22,21 +24,19 @@ const MONGODB_URI = process.env.NODE_ENV === 'test'
   ? process.env.MONGODB_TEST_URI
   : process.env.MONGODB_URI;
 
-mongoose.connect(MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log(`Connected to MongoDB (${process.env.NODE_ENV || 'development'})`))
-.catch(err => console.error('MongoDB connection error:', err));
-
 // Routes
 app.use('/api/matches', matchesRouter);
 app.use('/api/champions', championsRouter);
 app.use('/api/highlights', highlightsRouter);
 
 // Health check
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get('/health', async (req, res) => {
+  const dbHealth = await db.healthCheck();
+  res.json({
+    status: dbHealth.status === 'healthy' ? 'ok' : 'degraded',
+    timestamp: new Date().toISOString(),
+    database: dbHealth
+  });
 });
 
 // Root endpoint
@@ -67,9 +67,18 @@ app.use((err, req, res, next) => {
 
 // Start server
 if (require.main === module) {
-  app.listen(PORT, () => {
-    console.log(`lolHighlights server running on port ${PORT}`);
-  });
+  (async () => {
+    try {
+      await db.connect(MONGODB_URI);
+      await db.initialize();
+      await runMigrations(mongoose.connection);
+      console.log(`lolHighlights server running on port ${PORT}`);
+      app.listen(PORT);
+    } catch (err) {
+      console.error('Failed to start server:', err.message);
+      process.exit(1);
+    }
+  })();
 }
 
 module.exports = app;
