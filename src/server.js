@@ -9,6 +9,7 @@ const { run: runMigrations } = require('./config/migrations');
 const matchesRouter = require('./routes/matches');
 const championsRouter = require('./routes/champions');
 const highlightsRouter = require('./routes/highlights');
+const summonersRouter = require('./routes/summoners');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -28,6 +29,7 @@ const MONGODB_URI = process.env.NODE_ENV === 'test'
 app.use('/api/matches', matchesRouter);
 app.use('/api/champions', championsRouter);
 app.use('/api/highlights', highlightsRouter);
+app.use('/api/summoners', summonersRouter);
 
 // Health check
 app.get('/health', async (req, res) => {
