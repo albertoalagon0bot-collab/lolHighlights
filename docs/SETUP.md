@@ -20,6 +20,9 @@ npm install
 cp .env.example .env
 # Edit .env with your settings (see Configuration below)
 
+# Start MongoDB
+docker run -d -p 27017:27017 --name mongodb mongo:latest
+
 # Start the server
 npm start
 
@@ -33,59 +36,73 @@ The server starts at `http://localhost:3000`.
 
 Copy `.env.example` to `.env` and configure:
 
-### Required
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `PORT` | Server port | 3000 | No |
+| `NODE_ENV` | Environment (development/production) | development | No |
+| `MONGODB_URI` | MongoDB connection string | mongodb://localhost:27017/lolhighlights | No |
+| `MONGODB_TEST_URI` | Test database URI | mongodb://localhost:27017/lolhighlights_test | No |
+| `RIOT_API_KEY` | Riot Games API key | — | Yes (for Riot features) |
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `MONGODB_URI` | MongoDB connection string | `mongodb://localhost:27017/lolhighlights` |
-| `PORT` | Server port | `3000` |
+Example `.env`:
+```env
+PORT=3000
+NODE_ENV=development
+MONGODB_URI=mongodb://localhost:27017/lolhighlights
+MONGODB_TEST_URI=mongodb://localhost:27017/lolhighlights_test
+RIOT_API_KEY=RGAPI-xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
 
-### Optional
+## Riot API Key
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment | `development` |
-| `MONGODB_TEST_URI` | Test DB URI | `mongodb://localhost:27017/lolhighlights_test` |
-| `RIOT_API_KEY` | Riot Games API key | - |
-| `RIOT_API_REGION` | Default Riot region | `euw1` |
-| `DB_POOL_SIZE` | Max DB connections | `10` |
-| `DB_MIN_POOL_SIZE` | Min DB connections | `2` |
-| `JWT_SECRET` | JWT secret for auth | - |
-| `HIGHLIGHT_THRESHOLD` | Min highlight score (0-1) | `0.75` |
+1. Go to https://developer.riotgames.com/ and sign up
+2. Register a new application
+3. Copy your API key to `.env`
+4. **Note:** Development keys expire after 24 hours — regenerate as needed
+
+## Database Setup
+
+MongoDB indexes are created automatically by Mongoose models on first connection. No manual setup required.
+
+### MongoDB Options
+
+**Docker (recommended):**
+```bash
+docker run -d -p 27017:27017 --name lolhighlights-mongo mongo:latest
+```
+
+**MongoDB Atlas (cloud):**
+```
+MONGODB_URI=mongodb+srv://<user>:<pass>@cluster.mongodb.net/lolhighlights?retryWrites=true&w=majority
+```
 
 ## Running Tests
 
 ```bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run with coverage
-npx jest --coverage
+npm test           # Run all tests
+npm run test:watch # Watch mode
+npx jest --coverage # With coverage report
 ```
 
-## Database Setup
+## Development
 
-The application automatically:
-1. Connects to MongoDB with connection pooling
-2. Creates required indexes via the migration system
-3. Tracks migrations in a `migrations` collection
-
-No manual database initialization is needed.
-
-### Production Database
-
-For production, ensure MongoDB uses authentication and TLS:
-
-```
-MONGODB_URI=mongodb://user:password@mongo.example.com:27017/lolhighlights?authSource=admin&tls=true
+```bash
+npm run dev    # Start with nodemon auto-reload
+npm run lint   # Check code style
+npm run lint:fix # Fix linting issues
 ```
 
 ## Deployment
 
-### Docker (Recommended)
+### PM2 (recommended)
+
+```bash
+npm install -g pm2
+pm2 start src/server.js --name lolhighlights
+pm2 logs lolhighlights
+```
+
+### Docker
 
 ```dockerfile
 FROM node:18-alpine
@@ -99,49 +116,42 @@ CMD ["node", "src/server.js"]
 
 ```bash
 docker build -t lolhighlights .
-docker run -d -p 3000:3000 --env-file .env lolhighlights
-```
-
-### PM2
-
-```bash
-npm install -g pm2
-pm2 start src/server.js --name lolhighlights
-pm2 save
-pm2 startup
+docker run -d -p 3000:3000 --link lolhighlights-mongo:mongodb \
+  -e MONGODB_URI=mongodb://mongodb:27017/lolhighlights \
+  -e RIOT_API_KEY=your-api-key \
+  lolhighlights
 ```
 
 ### systemd
 
 Create `/etc/systemd/system/lolhighlights.service`:
-
 ```ini
 [Unit]
-Description=LoL Highlights API
-After=network.target mongodb.service
+Description=LOL Highlights API
+After=network.target
 
 [Service]
 Type=simple
-User=node
-WorkingDirectory=/opt/lolhighlights
-ExecStart=/usr/bin/node src/server.js
-Restart=on-failure
+User=your-username
+WorkingDirectory=/path/to/lolHighlights
 Environment=NODE_ENV=production
+Environment=PORT=3000
+Environment=MONGODB_URI=mongodb://localhost:27017/lolhighlights
+Environment=RIOT_API_KEY=your-api-key
+ExecStart=/usr/bin/node /path/to/lolHighlights/src/server.js
+Restart=on-failure
 
 [Install]
 WantedBy=multi-user.target
 ```
 
-```bash
-sudo systemctl enable lolhighlights
-sudo systemctl start lolhighlights
-```
+## Troubleshooting
 
-## Getting a Riot API Key
+- **MongoDB Connection Failed:** Ensure MongoDB is running and `MONGODB_URI` is correct
+- **Riot API Key Error:** Verify key in `.env`, check if development key expired (regenerate at developer.riotgames.com)
+- **Port in use:** Change `PORT` in `.env` or kill the process: `kill $(lsof -ti:3000)`
+- **Module not found:** Run `npm install`
 
-1. Go to [Riot Developer Portal](https://developer.riotgames.com/)
-2. Sign in or create an account
-3. Register your application to get an API key
-4. Add the key to your `.env` as `RIOT_API_KEY`
+## License
 
-**Rate Limits:** The client automatically handles Riot API rate limits with retry logic.
+MIT License - see LICENSE file for details.
