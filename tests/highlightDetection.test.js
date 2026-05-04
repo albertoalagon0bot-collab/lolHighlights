@@ -129,13 +129,14 @@ describe('HighlightDetector', () => {
     });
 
     it('should be highlight-worthy when score threshold is met', () => {
+      const detector = new HighlightDetector({ threshold: 0.5 });
       const matchData = {
         participants: [{
           championName: 'Aatrox',
-          stats: { pentaKills: 1 },
+          stats: { pentaKills: 1, quadraKills: 1, kills: 20, deaths: 0, assists: 15 },
           participantId: 1
         }],
-        teams: []
+        teams: [{ firstBlood: true, baronKills: 1, dragonKills: 1, towerKills: 4 }]
       };
 
       const isWorthy = detector.isHighlightWorthy(matchData);

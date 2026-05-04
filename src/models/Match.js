@@ -369,10 +369,10 @@ MatchSchema.statics.calculateHighlightScore = function(matchData) {
   
   // Check for epic objectives
   const objectives = matchData.teams.reduce((total, t) => {
-    total += t.towerKills;
-    total += t.inhibitorKills;
-    total += t.baronKills * 3;
-    total += t.dragonKills * 2;
+    total += (t.towerKills || 0);
+    total += (t.inhibitorKills || 0);
+    total += (t.baronKills || 0) * 3;
+    total += (t.dragonKills || 0) * 2;
     return total;
   }, 0);
   
