@@ -1,0 +1,117 @@
+.highlight-timeline {
+  width: 100%;
+}
+
+.filters {
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.filter-select {
+  background-color: #2a2a2a;
+  color: #fff;
+  border: 1px solid #444;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #ff6b6b;
+}
+
+.highlight-item {
+  background-color: #2a2a2a;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-left: 4px solid #333;
+}
+
+.highlight-item:last-child {
+  margin-bottom: 0;
+}
+
+.highlight-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.impact {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.8rem;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.champion {
+  font-weight: bold;
+  color: #ff6b6b;
+}
+
+.type {
+  background-color: #4ecdc4;
+  color: #000;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.timestamp {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.highlight-description {
+  color: #ccc;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.highlight-details {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+}
+
+.duration {
+  color: #4ecdc4;
+}
+
+.result {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.result.win {
+  background-color: #4caf50;
+  color: white;
+}
+
+.result.loss {
+  background-color: #f44336;
+  color: white;
+}
+
+.highlights-list {
+  margin-top: 1rem;
+}

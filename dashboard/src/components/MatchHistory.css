@@ -1,0 +1,73 @@
+.match-history {
+  width: 100%;
+}
+
+.match-item {
+  background-color: #2a2a2a;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border-left: 4px solid #333;
+}
+
+.match-item:last-child {
+  margin-bottom: 0;
+}
+
+.match-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.result {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.result.win {
+  background-color: #4caf50;
+  color: white;
+}
+
+.result.loss {
+  background-color: #f44336;
+  color: white;
+}
+
+.champion {
+  font-weight: bold;
+  color: #ff6b6b;
+}
+
+.date {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.match-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.kda {
+  margin-right: 1rem;
+}
+
+.duration {
+  margin-right: 1rem;
+}
+
+.highlights {
+  color: #4ecdc4;
+}
+
+.matches-list {
+  margin-top: 1rem;
+}

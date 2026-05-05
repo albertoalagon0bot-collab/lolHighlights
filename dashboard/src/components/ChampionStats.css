@@ -1,0 +1,58 @@
+.champion-stats {
+  width: 100%;
+}
+
+.champion-item {
+  display: flex;
+  align-items: center;
+  background-color: #2a2a2a;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border-left: 4px solid #333;
+}
+
+.champion-item:last-child {
+  margin-bottom: 0;
+}
+
+.champion-rank {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: #ff6b6b;
+  margin-right: 1rem;
+  min-width: 40px;
+}
+
+.champion-name {
+  flex: 1;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.champion-stats {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.win-rate {
+  font-weight: bold;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.kda {
+  color: #4ecdc4;
+  font-weight: bold;
+}
+
+.matches {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.champions-list {
+  margin-top: 1rem;
+}

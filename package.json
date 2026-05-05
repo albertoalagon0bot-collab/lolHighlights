@@ -5,11 +5,17 @@
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
-    "dev": "nodemon src/server.js",
+    "dev": "concurrently \"cd dashboard && npm run dev\" \"nodemon src/server.js\"",
     "test": "jest",
     "test:watch": "jest --watch",
     "lint": "eslint src/",
-    "lint:fix": "eslint src/ --fix"
+    "lint:fix": "eslint src/ --fix",
+    "dashboard:install": "cd dashboard && npm install",
+    "dashboard:build": "cd dashboard && npm run build",
+    "dashboard:dev": "cd dashboard && npm run dev"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   },
   "keywords": [
     "league-of-legends",
@@ -40,7 +46,8 @@
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-n": "^16.0.1",
-    "eslint-plugin-promise": "^6.1.1"
+    "eslint-plugin-promise": "^6.1.1",
+    "concurrently": "^8.2.2"
   },
   "jest": {
     "testEnvironment": "node",
