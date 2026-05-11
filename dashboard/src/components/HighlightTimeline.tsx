@@ -8,8 +8,9 @@ interface Highlight {
   timestamp: number
   type: string
   description: string
-  impact: 'low' | 'medium' | 'high'
+  severity: 'low' | 'medium' | 'high' | 'critical'
   champion: string
+  score: number
   duration?: number
   result?: 'win' | 'loss'
 }
@@ -35,7 +36,18 @@ const HighlightTimeline: React.FC = () => {
       const response = await fetch('/api/highlights')
       if (!response.ok) throw new Error('Failed to fetch highlights')
       const data = await response.json()
-      setHighlights(data)
+      
+      // Transform API response to match interface
+      const transformedHighlights = data.highlights?.map((highlight: any) => ({
+        ...highlight,
+        impact: highlight.severity || 'medium',
+        champion: highlight.championName || 'Unknown',
+        _id: highlight._id || highlight.matchId,
+        timestamp: highlight.timestamp || Date.now(),
+        score: highlight.score || 0
+      })) || []
+      
+      setHighlights(transformedHighlights)
       setLoading(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
@@ -74,6 +86,7 @@ const HighlightTimeline: React.FC = () => {
 
   const getImpactColor = (impact: string) => {
     switch (impact) {
+      case 'critical': return '#d32f2f'
       case 'high': return '#ff6b6b'
       case 'medium': return '#ff9800'
       case 'low': return '#4caf50'
@@ -83,6 +96,7 @@ const HighlightTimeline: React.FC = () => {
 
   const getImpactIcon = (impact: string) => {
     switch (impact) {
+      case 'critical': return '💀'
       case 'high': return '🔥'
       case 'medium': return '⚡'
       case 'low': return '✨'
@@ -97,16 +111,18 @@ const HighlightTimeline: React.FC = () => {
     
     if (existing) {
       existing.highlights++
-      if (highlight.impact === 'high') existing.highImpact++
-      if (highlight.impact === 'medium') existing.mediumImpact++
-      if (highlight.impact === 'low') existing.lowImpact++
+      if (highlight.severity === 'critical') existing.criticalImpact = (existing.criticalImpact || 0) + 1
+      if (highlight.severity === 'high') existing.highImpact = (existing.highImpact || 0) + 1
+      if (highlight.severity === 'medium') existing.mediumImpact = (existing.mediumImpact || 0) + 1
+      if (highlight.severity === 'low') existing.lowImpact = (existing.lowImpact || 0) + 1
     } else {
       acc.push({
         date,
         highlights: 1,
-        highImpact: highlight.impact === 'high' ? 1 : 0,
-        mediumImpact: highlight.impact === 'medium' ? 1 : 0,
-        lowImpact: highlight.impact === 'low' ? 1 : 0,
+        criticalImpact: highlight.severity === 'critical' ? 1 : 0,
+        highImpact: highlight.severity === 'high' ? 1 : 0,
+        mediumImpact: highlight.severity === 'medium' ? 1 : 0,
+        lowImpact: highlight.severity === 'low' ? 1 : 0,
       })
     }
     return acc
@@ -161,28 +177,34 @@ const HighlightTimeline: React.FC = () => {
         </div>
         <div className="stat-card">
           <div className="stat-value">
-            {highlights.filter(h => h.impact === 'high').length}
+            {highlights.filter(h => h.severity === 'critical').length}
+          </div>
+          <div className="stat-label">Critical</div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-value">
+            {highlights.filter(h => h.severity === 'high').length}
           </div>
           <div className="stat-label">High Impact</div>
         </div>
         <div className="stat-card">
           <div className="stat-value">
-            {highlights.filter(h => h.impact === 'medium').length}
+            {highlights.filter(h => h.severity === 'medium').length}
           </div>
-          <div className="stat-label">Medium Impact</div>
+          <div className="stat-label">Medium</div>
         </div>
         <div className="stat-card">
           <div className="stat-value">
-            {highlights.filter(h => h.impact === 'low').length}
+            {highlights.filter(h => h.severity === 'low').length}
           </div>
-          <div className="stat-label">Low Impact</div>
+          <div className="stat-label">Low</div>
         </div>
       </div>
 
       <div className="card">
         <h2>Highlights Timeline</h2>
         <div className="chart-container">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height={400}>
             <LineChart data={timelineData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#444" />
               <XAxis dataKey="date" stroke="#666" />
@@ -196,6 +218,13 @@ const HighlightTimeline: React.FC = () => {
                 dataKey="highlights" 
                 stroke="#ff6b6b" 
                 name="Total Highlights"
+                strokeWidth={2}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="criticalImpact" 
+                stroke="#d32f2f" 
+                name="Critical Impact"
                 strokeWidth={2}
               />
               <Line 
@@ -216,12 +245,13 @@ const HighlightTimeline: React.FC = () => {
           {filteredHighlights.slice(0, 20).map((highlight) => (
             <div key={highlight._id} className="highlight-item">
               <div className="highlight-header">
-                <span className="impact" style={{ color: getImpactColor(highlight.impact) }}>
-                  {getImpactIcon(highlight.impact)} {highlight.impact.toUpperCase()}
+                <span className="impact" style={{ color: getImpactColor(highlight.severity) }}>
+                  {getImpactIcon(highlight.severity)} {highlight.severity.toUpperCase()}
                 </span>
                 <span className="champion">{highlight.champion}</span>
                 <span className="type">{highlight.type}</span>
                 <span className="timestamp">{formatTimestamp(highlight.timestamp)}</span>
+                <span className="score">{highlight.score}pts</span>
               </div>
               <div className="highlight-description">
                 {highlight.description}

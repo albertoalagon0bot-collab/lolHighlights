@@ -12,6 +12,7 @@ const matchesRouter = require('./routes/matches')
 const championsRouter = require('./routes/champions')
 const highlightsRouter = require('./routes/highlights')
 const summonersRouter = require('./routes/summoners')
+const riotRouter = require('./routes/riot')
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -50,6 +51,7 @@ app.use('/api/matches', dbGuard, matchesRouter)
 app.use('/api/champions', dbGuard, championsRouter)
 app.use('/api/highlights', dbGuard, highlightsRouter)
 app.use('/api/summoners', dbGuard, summonersRouter)
+app.use('/api/riot', riotRouter)
 
 // Health check
 app.get('/health', async (req, res) => {
@@ -88,6 +90,13 @@ if (require.main === module) {
       await db.initialize()
       await runMigrations(mongoose.connection)
       console.log(`lolHighlights server running on port ${PORT}`)
+
+      // Start auto-fetch if enabled
+      if (process.env.AUTO_FETCH !== 'false') {
+        console.log('Starting automatic match fetching...')
+        riotService.startAutoFetch()
+      }
+
       app.listen(PORT, () => {
         console.log(`Server listening on port ${PORT}`)
       })
